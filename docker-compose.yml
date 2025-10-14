@@ -53,7 +53,7 @@ services:
       GF_SERVER_ROOT_URL: "https://grafana.janlieder.de/"
       GF_SERVER_SERVE_FROM_SUB_PATH: "false"
     expose:
-      - "3000"
+      - "3001"
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
