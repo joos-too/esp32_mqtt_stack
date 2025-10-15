@@ -4,13 +4,6 @@ CREATE TABLE IF NOT EXISTS measurements (
   ts               timestamptz NOT NULL DEFAULT now(),
   temp_c           real,
   hum_pct          real,
-  cpu_total_pct    real,
-  cpu_mp_pct       real,
-  core0_cpu_pct    real,
-  core1_cpu_pct    real,
-  mp_used_kb       integer,
-  mp_total_kb      integer,
-  idf_free_kb      integer,
   raw_payload      jsonb
 );
 
