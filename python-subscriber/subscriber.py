@@ -29,9 +29,7 @@ INSERT_SQL = """
     ) VALUES (
         %(device_id)s,
         COALESCE(%(ts)s::timestamptz, NOW()),
-        %(temp_c)s, %(hum_pct)s, %(cpu_total_pct)s, %(cpu_mp_pct)s,
-        %(core0_cpu_pct)s, %(core1_cpu_pct)s, %(mp_used_kb)s,
-        %(mp_total_kb)s, %(idf_free_kb)s, %(raw_payload)s
+        %(temp_c)s, %(hum_pct)s
     );
 """
 

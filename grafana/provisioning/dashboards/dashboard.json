@@ -61,58 +61,6 @@
         "w": 12,
         "h": 8
       }
-    },
-    {
-      "type": "timeseries",
-      "title": "CPU Load (%)",
-      "datasource": {
-        "type": "postgres",
-        "uid": "Sensors"
-      },
-      "targets": [
-        {
-          "format": "time_series",
-          "rawSql": "SELECT ts AS time, device_id, cpu_total_pct FROM measurements WHERE $__timeFilter(ts) ORDER BY ts",
-          "refId": "C"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percent"
-        }
-      },
-      "gridPos": {
-        "x": 0,
-        "y": 8,
-        "w": 12,
-        "h": 8
-      }
-    },
-    {
-      "type": "timeseries",
-      "title": "RAM Usage (KB)",
-      "datasource": {
-        "type": "postgres",
-        "uid": "Sensors"
-      },
-      "targets": [
-        {
-          "format": "time_series",
-          "rawSql": "SELECT ts AS time, device_id, mp_used_kb FROM measurements WHERE $__timeFilter(ts) ORDER BY ts",
-          "refId": "D"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "kbytes"
-        }
-      },
-      "gridPos": {
-        "x": 12,
-        "y": 8,
-        "w": 12,
-        "h": 8
-      }
     }
   ]
 }
