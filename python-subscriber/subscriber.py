@@ -56,6 +56,8 @@ def on_connect(client, userdata, flags, reason_code, properties=None):
 
 
 def on_message(client, userdata, msg):
+    global pg_conn
+
     payload_txt = msg.payload.decode("utf-8", errors="ignore")
     try:
         data = json.loads(payload_txt)
