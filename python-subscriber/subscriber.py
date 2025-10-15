@@ -24,12 +24,11 @@ PG_CONN_INFO = {
 
 INSERT_SQL = """
     INSERT INTO measurements (
-        device_id, ts, temp_c, hum_pct, cpu_total_pct, cpu_mp_pct,
-        core0_cpu_pct, core1_cpu_pct, mp_used_kb, mp_total_kb, idf_free_kb, raw_payload
+        device_id, ts, temp_c, hum_pct, raw_payload
     ) VALUES (
         %(device_id)s,
         COALESCE(%(ts)s::timestamptz, NOW()),
-        %(temp_c)s, %(hum_pct)s
+        %(temp_c)s, %(hum_pct)s, %(raw_payload)s
     );
 """
 
