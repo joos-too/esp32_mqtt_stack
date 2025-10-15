@@ -44,7 +44,7 @@ services:
       PGPASSWORD: ${PGPASSWORD}
 
   grafana:
-    image: grafana/grafana:11.2.0
+    image: grafana/grafana:12.2.0
     container_name: grafana
     restart: unless-stopped
     environment:
