@@ -8,7 +8,7 @@ services:
     volumes:
       - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - ./mosquitto/passwordfile:/mosquitto/passwordfile:ro
-      - /etc/letsencrypt/live/janlieder.de:/mosquitto/certs:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
       - ./mosquitto/data:/mosquitto/data
       - ./mosquitto/log:/mosquitto/log
 
