@@ -15,7 +15,7 @@ services:
       - ./mosquitto/log:/mosquitto/log
 
   postgres:
-    image: postgres:16
+    image: timescale/timescaledb-ha:pg16-latest
     container_name: sensors-db
     restart: unless-stopped
     environment:
