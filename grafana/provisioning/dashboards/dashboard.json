@@ -20,7 +20,7 @@
       "targets": [
         {
           "format": "time_series",
-          "rawSql": "SELECT ts AS time, device_id, temp_c FROM measurements ORDER BY ts DESC LIMIT 100;",
+          "rawSql": "SELECT ts AS time, device_id, temp_c FROM measurements WHERE $__timeFilter(ts) ORDER BY ts",
           "refId": "A"
         }
       ],
