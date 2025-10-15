@@ -1,0 +1,118 @@
+{
+  "id": null,
+  "title": "ESP32 Sensor Dashboard",
+  "tags": [
+    "esp32",
+    "sensors"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Temperature (°C)",
+      "datasource": {
+        "type": "postgres",
+        "uid": "Sensors"
+      },
+      "targets": [
+        {
+          "format": "time_series",
+          "rawSql": "SELECT ts AS time, device_id, temp_c FROM measurements WHERE $__timeFilter(ts) ORDER BY ts",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius"
+        }
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Humidity (%)",
+      "datasource": {
+        "type": "postgres",
+        "uid": "Sensors"
+      },
+      "targets": [
+        {
+          "format": "time_series",
+          "rawSql": "SELECT ts AS time, device_id, hum_pct FROM measurements WHERE $__timeFilter(ts) ORDER BY ts",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "CPU Load (%)",
+      "datasource": {
+        "type": "postgres",
+        "uid": "Sensors"
+      },
+      "targets": [
+        {
+          "format": "time_series",
+          "rawSql": "SELECT ts AS time, device_id, cpu_total_pct FROM measurements WHERE $__timeFilter(ts) ORDER BY ts",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "RAM Usage (KB)",
+      "datasource": {
+        "type": "postgres",
+        "uid": "Sensors"
+      },
+      "targets": [
+        {
+          "format": "time_series",
+          "rawSql": "SELECT ts AS time, device_id, mp_used_kb FROM measurements WHERE $__timeFilter(ts) ORDER BY ts",
+          "refId": "D"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kbytes"
+        }
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      }
+    }
+  ]
+}
