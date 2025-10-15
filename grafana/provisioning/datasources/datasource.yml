@@ -6,6 +6,7 @@ deleteDatasources:
 
 datasources:
   - name: Sensors
+    uid: Sensors
     type: postgres
     access: proxy
     isDefault: true
