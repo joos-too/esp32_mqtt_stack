@@ -4,10 +4,12 @@ services:
     container_name: mqtt-broker
     restart: unless-stopped
     ports:
-      - "1883:1883"        # MQTT
+      - "1883:1883"
+      - "8883:8883"
     volumes:
       - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - ./mosquitto/passwordfile:/mosquitto/passwordfile:ro
+      - /etc/letsencrypt/live/mqtt.example.com:/mosquitto/certs:ro
       - ./mosquitto/data:/mosquitto/data
       - ./mosquitto/log:/mosquitto/log
 
