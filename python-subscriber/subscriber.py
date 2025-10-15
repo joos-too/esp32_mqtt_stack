@@ -103,7 +103,6 @@ def on_message(client, userdata, msg):
         print(f"Inserted from {dev} @ topic {msg.topic}")
     except (psycopg2.InterfaceError, psycopg2.OperationalError):
         # reconnect DB and retry once
-        global pg_conn
         pg_conn = pg_connect()
         with pg_conn.cursor() as cur:
             cur.execute(INSERT_SQL, row)
