@@ -2,7 +2,7 @@
 
 Ein Docker-Compose-Stack, der Sensordaten von ESP32-Geräten entgegennimmt, speichert und visualisiert:
 
-- ESP32 veröffentlicht Messwerte per MQTT (siehe Repositories in [Micropython](https://github.com/joos-too/esp32_sensor_data) und [C++](https://github.com/joos-too/esp32_sensor_data_plattformIO)
+- ESP32 veröffentlicht Messwerte per MQTT (siehe Repositories in [Micropython](https://github.com/joos-too/esp32_sensor_data) und [C++](https://github.com/joos-too/esp32_sensor_data_plattformIO))
 - **Mosquitto** (TLS-fähig) nimmt die Nachrichten entgegen
 - **python-subscriber** konsumiert MQTT-Nachrichten und schreibt sie in **TimescaleDB/PostgreSQL**
 - **Grafana** greift auf die Datenbank zu und stellt Dashboards bereit
