@@ -24,11 +24,17 @@ PG_CONN_INFO = {
 
 INSERT_SQL = """
     INSERT INTO measurements (
-        device_id, ts, temp_c, hum_pct, raw_payload
+        device_id, ts, temp_c, hum_pct,
+        temp_zscore_anomaly, temp_ewma_anomaly, temp_adaptive_threshold_anomaly,
+        hum_zscore_anomaly, hum_ewma_anomaly, hum_adaptive_threshold_anomaly,
+        raw_payload
     ) VALUES (
         %(device_id)s,
         COALESCE(%(ts)s::timestamptz, NOW()),
-        %(temp_c)s, %(hum_pct)s, %(raw_payload)s
+        %(temp_c)s, %(hum_pct)s,
+        %(temp_zscore_anomaly)s, %(temp_ewma_anomaly)s, %(temp_adaptive_threshold_anomaly)s,
+        %(hum_zscore_anomaly)s, %(hum_ewma_anomaly)s, %(hum_adaptive_threshold_anomaly)s,
+        %(raw_payload)s
     );
 """
 
@@ -66,6 +72,23 @@ def insert_measurement(conn, row):
             cur.execute(INSERT_SQL, row)
     return conn  # may be a new connection
 
+# --- Payload helpers -----------------------------------------------------------
+
+def to_bool(value):
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return value != 0
+    if isinstance(value, str):
+        normalized = value.strip().lower()
+        if normalized in ("true", "t", "yes", "y", "1", "on"):
+            return True
+        if normalized in ("false", "f", "no", "n", "0", "off"):
+            return False
+    return None
+
 # --- MQTT callbacks ------------------------------------------------------------
 
 def on_connect(client, userdata, flags, reason_code, properties=None):
@@ -95,6 +118,16 @@ def on_message(client, userdata, msg):
             ts_val = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(float(ts)))
         except Exception:
             ts_val = None
+    elif isinstance(ts, (list, tuple)) and len(ts) >= 6:
+        try:
+            ts_parts = list(ts[:6])
+            ts_parts.extend([0, 0, -1])
+            ts_val = time.strftime(
+                "%Y-%m-%dT%H:%M:%SZ",
+                time.gmtime(time.mktime(tuple(ts_parts))),
+            )
+        except Exception:
+            ts_val = None
     elif isinstance(ts, str):
         ts_val = ts
 
@@ -104,6 +137,12 @@ def on_message(client, userdata, msg):
         "ts": ts_val,
         "temp_c": data.get("temp_c"),
         "hum_pct": data.get("hum_pct"),
+        "temp_zscore_anomaly": to_bool(data.get("temp_zscore_anomaly")),
+        "temp_ewma_anomaly": to_bool(data.get("temp_ewma_anomaly")),
+        "temp_adaptive_threshold_anomaly": to_bool(data.get("temp_adaptive_threshold_anomaly")),
+        "hum_zscore_anomaly": to_bool(data.get("hum_zscore_anomaly")),
+        "hum_ewma_anomaly": to_bool(data.get("hum_ewma_anomaly")),
+        "hum_adaptive_threshold_anomaly": to_bool(data.get("hum_adaptive_threshold_anomaly")),
         "cpu_total_pct": data.get("cpu_total_pct"),
         "cpu_mp_pct": data.get("cpu_mp_pct"),
         "core0_cpu_pct": data.get("cpu_core0_pct"),

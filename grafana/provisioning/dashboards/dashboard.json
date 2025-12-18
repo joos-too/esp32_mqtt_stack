@@ -22,12 +22,113 @@
           "format": "time_series",
           "rawSql": "SELECT ts AS time, device_id, temp_c FROM measurements WHERE $__timeFilter(ts) ORDER BY ts",
           "refId": "A"
+        },
+        {
+          "format": "time_series",
+          "rawSql": "SELECT ts AS time, temp_c AS value, device_id || ' z-score' AS metric FROM measurements WHERE $__timeFilter(ts) AND temp_zscore_anomaly IS TRUE ORDER BY ts",
+          "refId": "B"
+        },
+        {
+          "format": "time_series",
+          "rawSql": "SELECT ts AS time, temp_c AS value, device_id || ' ewma' AS metric FROM measurements WHERE $__timeFilter(ts) AND temp_ewma_anomaly IS TRUE ORDER BY ts",
+          "refId": "C"
+        },
+        {
+          "format": "time_series",
+          "rawSql": "SELECT ts AS time, temp_c AS value, device_id || ' adaptive threshold' AS metric FROM measurements WHERE $__timeFilter(ts) AND temp_adaptive_threshold_anomaly IS TRUE ORDER BY ts",
+          "refId": "D"
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "celsius"
-        }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "custom.drawStyle",
+                "value": "points"
+              },
+              {
+                "id": "custom.showPoints",
+                "value": "always"
+              },
+              {
+                "id": "custom.pointSize",
+                "value": 8
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 0
+              },
+              {
+                "id": "custom.pointStyle",
+                "value": "crossRot"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "C"
+            },
+            "properties": [
+              {
+                "id": "custom.drawStyle",
+                "value": "points"
+              },
+              {
+                "id": "custom.showPoints",
+                "value": "always"
+              },
+              {
+                "id": "custom.pointSize",
+                "value": 8
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 0
+              },
+              {
+                "id": "custom.pointStyle",
+                "value": "circle"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "D"
+            },
+            "properties": [
+              {
+                "id": "custom.drawStyle",
+                "value": "points"
+              },
+              {
+                "id": "custom.showPoints",
+                "value": "always"
+              },
+              {
+                "id": "custom.pointSize",
+                "value": 8
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 0
+              },
+              {
+                "id": "custom.pointStyle",
+                "value": "square"
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "x": 0,
@@ -47,13 +148,114 @@
         {
           "format": "time_series",
           "rawSql": "SELECT ts AS time, device_id, hum_pct FROM measurements WHERE $__timeFilter(ts) ORDER BY ts",
+          "refId": "A"
+        },
+        {
+          "format": "time_series",
+          "rawSql": "SELECT ts AS time, hum_pct AS value, device_id || ' z-score' AS metric FROM measurements WHERE $__timeFilter(ts) AND hum_zscore_anomaly IS TRUE ORDER BY ts",
           "refId": "B"
+        },
+        {
+          "format": "time_series",
+          "rawSql": "SELECT ts AS time, hum_pct AS value, device_id || ' ewma' AS metric FROM measurements WHERE $__timeFilter(ts) AND hum_ewma_anomaly IS TRUE ORDER BY ts",
+          "refId": "C"
+        },
+        {
+          "format": "time_series",
+          "rawSql": "SELECT ts AS time, hum_pct AS value, device_id || ' adaptive threshold' AS metric FROM measurements WHERE $__timeFilter(ts) AND hum_adaptive_threshold_anomaly IS TRUE ORDER BY ts",
+          "refId": "D"
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "percent"
-        }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "custom.drawStyle",
+                "value": "points"
+              },
+              {
+                "id": "custom.showPoints",
+                "value": "always"
+              },
+              {
+                "id": "custom.pointSize",
+                "value": 8
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 0
+              },
+              {
+                "id": "custom.pointStyle",
+                "value": "crossRot"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "C"
+            },
+            "properties": [
+              {
+                "id": "custom.drawStyle",
+                "value": "points"
+              },
+              {
+                "id": "custom.showPoints",
+                "value": "always"
+              },
+              {
+                "id": "custom.pointSize",
+                "value": 8
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 0
+              },
+              {
+                "id": "custom.pointStyle",
+                "value": "circle"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "D"
+            },
+            "properties": [
+              {
+                "id": "custom.drawStyle",
+                "value": "points"
+              },
+              {
+                "id": "custom.showPoints",
+                "value": "always"
+              },
+              {
+                "id": "custom.pointSize",
+                "value": 8
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 0
+              },
+              {
+                "id": "custom.pointStyle",
+                "value": "square"
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "x": 12,
