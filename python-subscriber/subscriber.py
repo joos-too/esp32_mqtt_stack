@@ -13,6 +13,8 @@ MQTT_PORT = int(os.environ.get("MQTT_PORT", "1883"))
 MQTT_TOPIC = os.environ.get("MQTT_TOPIC", "sensors/esp32/#")
 MQTT_USERNAME = os.environ.get("MQTT_USERNAME", "")
 MQTT_PASSWORD = os.environ.get("MQTT_PASSWORD", "")
+LOG_PAYLOADS = os.environ.get("MQTT_LOG_PAYLOADS", "").strip().lower() in ("1", "true", "t", "yes", "y", "on")
+PAYLOAD_LOG_MAX = int(os.environ.get("MQTT_PAYLOAD_LOG_MAX", "10000"))
 
 PG_CONN_INFO = {
     "host": os.environ.get("PGHOST", "postgres"),
@@ -169,6 +171,16 @@ def on_connect(client, userdata, flags, reason_code, properties=None):
 def on_message(client, userdata, msg):
     conn = userdata["pg_conn"]
     payload_txt = msg.payload.decode("utf-8", errors="ignore")
+    if LOG_PAYLOADS:
+        if len(payload_txt) > PAYLOAD_LOG_MAX:
+            logging.info(
+                "MQTT payload on %s (truncated %d chars): %s",
+                msg.topic,
+                len(payload_txt) - PAYLOAD_LOG_MAX,
+                payload_txt[:PAYLOAD_LOG_MAX],
+            )
+        else:
+            logging.info("MQTT payload on %s: %s", msg.topic, payload_txt)
 
     try:
         data = json.loads(payload_txt)
@@ -186,9 +198,15 @@ def on_message(client, userdata, msg):
     elif event is not None:
         event = str(event)
 
-    window_before = None
-    if event == "anomaly":
-        window_before = normalize_window_before(data.get("window_before"))
+    window_before = normalize_window_before(data.get("window_before"))
+    if window_before and not event:
+        # Treat missing event as anomaly when a window is present.
+        event = "anomaly"
+    elif window_before and event != "anomaly":
+        logging.warning(
+            "Window data present but event=%s; storing window anyway",
+            event,
+        )
 
     rows = []
     rows.append(build_row(dev, measurement, event=event, window_before=window_before, raw_payload=data))
