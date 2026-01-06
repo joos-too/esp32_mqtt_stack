@@ -27,14 +27,14 @@ INSERT_SQL = """
         device_id, ts, temp_c, hum_pct,
         temp_zscore_anomaly, temp_ewma_anomaly, temp_adaptive_threshold_anomaly,
         hum_zscore_anomaly, hum_ewma_anomaly, hum_adaptive_threshold_anomaly,
-        raw_payload
+        event, window_before, raw_payload
     ) VALUES (
         %(device_id)s,
         COALESCE(%(ts)s::timestamptz, NOW()),
         %(temp_c)s, %(hum_pct)s,
         %(temp_zscore_anomaly)s, %(temp_ewma_anomaly)s, %(temp_adaptive_threshold_anomaly)s,
         %(hum_zscore_anomaly)s, %(hum_ewma_anomaly)s, %(hum_adaptive_threshold_anomaly)s,
-        %(raw_payload)s
+        %(event)s, %(window_before)s, %(raw_payload)s
     );
 """
 
@@ -72,6 +72,12 @@ def insert_measurement(conn, row):
             cur.execute(INSERT_SQL, row)
     return conn  # may be a new connection
 
+def insert_measurements(conn, rows):
+    """Insert multiple measurements, reconnecting if needed."""
+    for row in rows:
+        conn = insert_measurement(conn, row)
+    return conn
+
 # --- Payload helpers -----------------------------------------------------------
 
 def to_bool(value):
@@ -88,6 +94,69 @@ def to_bool(value):
         if normalized in ("false", "f", "no", "n", "0", "off"):
             return False
     return None
+
+def normalize_ts(value):
+    if isinstance(value, (int, float)):
+        try:
+            return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(float(value)))
+        except Exception:
+            return None
+    if isinstance(value, (list, tuple)) and len(value) >= 6:
+        try:
+            ts_parts = list(value[:6])
+            ts_parts.extend([0, 0, -1])
+            return time.strftime(
+                "%Y-%m-%dT%H:%M:%SZ",
+                time.gmtime(time.mktime(tuple(ts_parts))),
+            )
+        except Exception:
+            return None
+    if isinstance(value, str):
+        return value
+    return None
+
+def normalize_measurement(entry):
+    if not isinstance(entry, dict):
+        return None
+    return {
+        "ts": normalize_ts(entry.get("ts")),
+        "temp_c": entry.get("temp_c"),
+        "hum_pct": entry.get("hum_pct"),
+        "temp_zscore_anomaly": to_bool(entry.get("temp_zscore_anomaly")),
+        "temp_ewma_anomaly": to_bool(entry.get("temp_ewma_anomaly")),
+        "temp_adaptive_threshold_anomaly": to_bool(entry.get("temp_adaptive_threshold_anomaly")),
+        "hum_zscore_anomaly": to_bool(entry.get("hum_zscore_anomaly")),
+        "hum_ewma_anomaly": to_bool(entry.get("hum_ewma_anomaly")),
+        "hum_adaptive_threshold_anomaly": to_bool(entry.get("hum_adaptive_threshold_anomaly")),
+    }
+
+def normalize_window_before(raw_window):
+    if not isinstance(raw_window, list):
+        return None
+    cleaned = []
+    for entry in raw_window[:15]:
+        normalized = normalize_measurement(entry)
+        if not normalized or not normalized.get("ts"):
+            continue
+        cleaned.append(normalized)
+    return cleaned or None
+
+def build_row(device_id, measurement, event=None, window_before=None, raw_payload=None):
+    return {
+        "device_id": device_id,
+        "ts": measurement.get("ts"),
+        "temp_c": measurement.get("temp_c"),
+        "hum_pct": measurement.get("hum_pct"),
+        "temp_zscore_anomaly": measurement.get("temp_zscore_anomaly"),
+        "temp_ewma_anomaly": measurement.get("temp_ewma_anomaly"),
+        "temp_adaptive_threshold_anomaly": measurement.get("temp_adaptive_threshold_anomaly"),
+        "hum_zscore_anomaly": measurement.get("hum_zscore_anomaly"),
+        "hum_ewma_anomaly": measurement.get("hum_ewma_anomaly"),
+        "hum_adaptive_threshold_anomaly": measurement.get("hum_adaptive_threshold_anomaly"),
+        "event": event,
+        "window_before": psycopg2.extras.Json(window_before) if window_before is not None else None,
+        "raw_payload": psycopg2.extras.Json(raw_payload) if raw_payload is not None else None,
+    }
 
 # --- MQTT callbacks ------------------------------------------------------------
 
@@ -106,55 +175,32 @@ def on_message(client, userdata, msg):
     except Exception:
         logging.warning(f"Non-JSON message on {msg.topic}: {payload_txt[:100]}")
         return
-
     # Normalize fields
     dev = data.get("device_id") or data.get("device") or "unknown"
 
-    # Normalize timestamp (epoch or ISO)
-    ts_val = None
-    ts = data.get("ts")
-    if isinstance(ts, (int, float)):
-        try:
-            ts_val = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(float(ts)))
-        except Exception:
-            ts_val = None
-    elif isinstance(ts, (list, tuple)) and len(ts) >= 6:
-        try:
-            ts_parts = list(ts[:6])
-            ts_parts.extend([0, 0, -1])
-            ts_val = time.strftime(
-                "%Y-%m-%dT%H:%M:%SZ",
-                time.gmtime(time.mktime(tuple(ts_parts))),
-            )
-        except Exception:
-            ts_val = None
-    elif isinstance(ts, str):
-        ts_val = ts
+    measurement = normalize_measurement(data) or {}
 
-    # Prepare DB row
-    row = {
-        "device_id": dev,
-        "ts": ts_val,
-        "temp_c": data.get("temp_c"),
-        "hum_pct": data.get("hum_pct"),
-        "temp_zscore_anomaly": to_bool(data.get("temp_zscore_anomaly")),
-        "temp_ewma_anomaly": to_bool(data.get("temp_ewma_anomaly")),
-        "temp_adaptive_threshold_anomaly": to_bool(data.get("temp_adaptive_threshold_anomaly")),
-        "hum_zscore_anomaly": to_bool(data.get("hum_zscore_anomaly")),
-        "hum_ewma_anomaly": to_bool(data.get("hum_ewma_anomaly")),
-        "hum_adaptive_threshold_anomaly": to_bool(data.get("hum_adaptive_threshold_anomaly")),
-        "cpu_total_pct": data.get("cpu_total_pct"),
-        "cpu_mp_pct": data.get("cpu_mp_pct"),
-        "core0_cpu_pct": data.get("cpu_core0_pct"),
-        "core1_cpu_pct": data.get("cpu_core1_pct"),
-        "mp_used_kb": data.get("mp_used_kb"),
-        "mp_total_kb": data.get("mp_total_kb"),
-        "idf_free_kb": data.get("idf_free_kb"),
-        "raw_payload": psycopg2.extras.Json(data),
-    }
+    event = data.get("event")
+    if isinstance(event, str):
+        event = event.strip() or None
+    elif event is not None:
+        event = str(event)
+
+    window_before = None
+    if event == "anomaly":
+        window_before = normalize_window_before(data.get("window_before"))
+
+    rows = []
+    rows.append(build_row(dev, measurement, event=event, window_before=window_before, raw_payload=data))
+    if window_before:
+        for entry in window_before:
+            entry_payload = dict(entry)
+            entry_payload["window_before"] = True
+            entry_payload["parent_event"] = event
+            rows.append(build_row(dev, entry, raw_payload=entry_payload))
 
     # Insert data and update connection if reconnected
-    new_conn = insert_measurement(conn, row)
+    new_conn = insert_measurements(conn, rows)
     if new_conn != conn:
         userdata["pg_conn"] = new_conn
 

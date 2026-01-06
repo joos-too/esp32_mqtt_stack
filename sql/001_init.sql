@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS measurements (
   hum_zscore_anomaly boolean,
   hum_ewma_anomaly boolean,
   hum_adaptive_threshold_anomaly boolean,
+  event            text,
+  window_before    jsonb,
   raw_payload      jsonb
 );
 
