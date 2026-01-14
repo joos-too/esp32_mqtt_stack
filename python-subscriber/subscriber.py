@@ -28,14 +28,18 @@ INSERT_SQL = """
     INSERT INTO measurements (
         device_id, ts, temp_c, hum_pct,
         temp_zscore_anomaly, temp_ewma_anomaly, temp_adaptive_threshold_anomaly,
+        temp_rulebased_anomaly,
         hum_zscore_anomaly, hum_ewma_anomaly, hum_adaptive_threshold_anomaly,
+        hum_rulebased_anomaly,
         event, window_before, raw_payload
     ) VALUES (
         %(device_id)s,
         COALESCE(%(ts)s::timestamptz, NOW()),
         %(temp_c)s, %(hum_pct)s,
         %(temp_zscore_anomaly)s, %(temp_ewma_anomaly)s, %(temp_adaptive_threshold_anomaly)s,
+        %(temp_rulebased_anomaly)s,
         %(hum_zscore_anomaly)s, %(hum_ewma_anomaly)s, %(hum_adaptive_threshold_anomaly)s,
+        %(hum_rulebased_anomaly)s,
         %(event)s, %(window_before)s, %(raw_payload)s
     );
 """
@@ -127,9 +131,11 @@ def normalize_measurement(entry):
         "temp_zscore_anomaly": to_bool(entry.get("temp_zscore_anomaly")),
         "temp_ewma_anomaly": to_bool(entry.get("temp_ewma_anomaly")),
         "temp_adaptive_threshold_anomaly": to_bool(entry.get("temp_adaptive_threshold_anomaly")),
+        "temp_rulebased_anomaly": to_bool(entry.get("temp_rulebased_anomaly")),
         "hum_zscore_anomaly": to_bool(entry.get("hum_zscore_anomaly")),
         "hum_ewma_anomaly": to_bool(entry.get("hum_ewma_anomaly")),
         "hum_adaptive_threshold_anomaly": to_bool(entry.get("hum_adaptive_threshold_anomaly")),
+        "hum_rulebased_anomaly": to_bool(entry.get("hum_rulebased_anomaly")),
     }
 
 def normalize_window_before(raw_window):
@@ -152,9 +158,11 @@ def build_row(device_id, measurement, event=None, window_before=None, raw_payloa
         "temp_zscore_anomaly": measurement.get("temp_zscore_anomaly"),
         "temp_ewma_anomaly": measurement.get("temp_ewma_anomaly"),
         "temp_adaptive_threshold_anomaly": measurement.get("temp_adaptive_threshold_anomaly"),
+        "temp_rulebased_anomaly": measurement.get("temp_rulebased_anomaly"),
         "hum_zscore_anomaly": measurement.get("hum_zscore_anomaly"),
         "hum_ewma_anomaly": measurement.get("hum_ewma_anomaly"),
         "hum_adaptive_threshold_anomaly": measurement.get("hum_adaptive_threshold_anomaly"),
+        "hum_rulebased_anomaly": measurement.get("hum_rulebased_anomaly"),
         "event": event,
         "window_before": psycopg2.extras.Json(window_before) if window_before is not None else None,
         "raw_payload": psycopg2.extras.Json(raw_payload) if raw_payload is not None else None,

@@ -11,9 +11,11 @@ CREATE TABLE IF NOT EXISTS measurements (
   temp_zscore_anomaly boolean,
   temp_ewma_anomaly boolean,
   temp_adaptive_threshold_anomaly boolean,
+  temp_rulebased_anomaly boolean,
   hum_zscore_anomaly boolean,
   hum_ewma_anomaly boolean,
   hum_adaptive_threshold_anomaly boolean,
+  hum_rulebased_anomaly boolean,
   event            text,
   window_before    jsonb,
   raw_payload      jsonb

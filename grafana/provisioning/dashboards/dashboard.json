@@ -37,6 +37,11 @@
           "format": "time_series",
           "rawSql": "SELECT ts AS time, temp_c AS value, device_id || ' adaptive threshold' AS metric FROM measurements WHERE $__timeFilter(ts) AND temp_adaptive_threshold_anomaly IS TRUE ORDER BY ts",
           "refId": "D"
+        },
+        {
+          "format": "time_series",
+          "rawSql": "SELECT ts AS time, temp_c AS value, device_id || ' rule-based' AS metric FROM measurements WHERE $__timeFilter(ts) AND temp_rulebased_anomaly IS TRUE ORDER BY ts",
+          "refId": "E"
         }
       ],
       "fieldConfig": {
@@ -127,6 +132,34 @@
                 "value": "square"
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "E"
+            },
+            "properties": [
+              {
+                "id": "custom.drawStyle",
+                "value": "points"
+              },
+              {
+                "id": "custom.showPoints",
+                "value": "always"
+              },
+              {
+                "id": "custom.pointSize",
+                "value": 8
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 0
+              },
+              {
+                "id": "custom.pointStyle",
+                "value": "triangle"
+              }
+            ]
           }
         ]
       },
@@ -164,6 +197,11 @@
           "format": "time_series",
           "rawSql": "SELECT ts AS time, hum_pct AS value, device_id || ' adaptive threshold' AS metric FROM measurements WHERE $__timeFilter(ts) AND hum_adaptive_threshold_anomaly IS TRUE ORDER BY ts",
           "refId": "D"
+        },
+        {
+          "format": "time_series",
+          "rawSql": "SELECT ts AS time, hum_pct AS value, device_id || ' rule-based' AS metric FROM measurements WHERE $__timeFilter(ts) AND hum_rulebased_anomaly IS TRUE ORDER BY ts",
+          "refId": "E"
         }
       ],
       "fieldConfig": {
@@ -252,6 +290,34 @@
               {
                 "id": "custom.pointStyle",
                 "value": "square"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "E"
+            },
+            "properties": [
+              {
+                "id": "custom.drawStyle",
+                "value": "points"
+              },
+              {
+                "id": "custom.showPoints",
+                "value": "always"
+              },
+              {
+                "id": "custom.pointSize",
+                "value": 8
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 0
+              },
+              {
+                "id": "custom.pointStyle",
+                "value": "triangle"
               }
             ]
           }
